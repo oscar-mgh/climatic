@@ -1,95 +1,95 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
+
+import { useEffect, useState } from 'react';
+import styles from './page.module.css';
+import { WeatherResponse } from '@/interfaces';
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const [weatherInfo, setWeatherInfo] = useState<WeatherResponse | null>(null);
+	const coordinates = { lat: '25.686613', lon: '-100.316116' };
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const getWeather = async (hours = 0) => {
+		const apiParams = `?lat=${coordinates.lat}&lon=${coordinates.lon}&units=metric&lang=es&appid=${process.env.API_KEY}`;
+		const res = await fetch(
+			`https://api.openweathermap.org/data/2.5/weather` + apiParams
+		);
+		const data: WeatherResponse = await res.json();
+		setWeatherInfo(data);
+	};
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	useEffect(() => {
+		getWeather();
+	}, []);
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	if (!weatherInfo)
+		return (
+			<main className={styles.loading}>
+				<h2>Cargando...</h2>
+			</main>
+		);
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
+	return (
+		<main className={styles.main}>
+			<img
+				src="/climatic - primary.svg"
+				alt="logo"
+				className={styles.logo}
+				width={74}
+				height={15}
+			/>
+			<div className={styles.card}>
+				<p className={styles.weather}>{weatherInfo.weather[0].description}</p>
+				<p className={styles.temperature}>
+					{parseInt(weatherInfo.main.temp.toString())}
+					<span>°</span>
+				</p>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+				<hr className={styles.bar} />
+				<div className={styles.minmax}>
+					<p>
+						min. <span>{parseInt(weatherInfo.main.temp_min.toString())}</span>
+					</p>
+					<p>
+						Max. <span>{parseInt(weatherInfo.main.temp_max.toString())}</span>
+					</p>
+				</div>
+				<hr className={styles.bar} />
+			</div>
+
+			<div className={styles.weather__info}>
+				<p className={styles.weather__city}>Pronóstico de {weatherInfo.name}</p>
+				<p className={styles.wheather__next}>Próximas 9 horas</p>
+			</div>
+
+			<section className={styles.history}>
+				<div className={styles.badge}>
+					<p>
+						min. <span>34</span>
+					</p>
+					<p>Nubes dispersas</p>
+					<p>
+						Max. <span>39</span>
+					</p>
+				</div>
+				<div className={styles.minmax}>
+					<p>
+						<span>28</span>
+					</p>
+					<p>Algo de nubes</p>
+					<p>
+						<span>29</span>
+					</p>
+				</div>
+				<div className={styles.minmax}>
+					<p>
+						<span>19</span>
+					</p>
+					<p>Cielo claro</p>
+					<p>
+						<span>22</span>
+					</p>
+				</div>
+			</section>
+		</main>
+	);
 }
